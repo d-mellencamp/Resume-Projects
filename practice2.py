@@ -15,7 +15,7 @@ mpg = 51
 average_passengers = 230
 current_day = date.today()
 
-
+# Using the geopy library the Client class finds the gps coordinates of the user's inputs
 class Client:
     def __init__(self, name):
         self.name = name
@@ -23,6 +23,7 @@ class Client:
     def client_info(self):
         print("Make sure to put the city last so the coordinates are accurate.")
         x = 0
+# I use a while loop to make sure destination input is in the proper format 
         while x < 1:
             self.departing = input("Where are you departing from?(State|City) ").title().strip()
             location = Nominatim(user_agent="get_location")
@@ -42,6 +43,7 @@ class Client:
                 pass
 
     def flight_date(self):
+# I use a while loop here as well to make sure date input is in the proper format
         while True:
             try:
                 year, month, day = input("What day are you wanting to book a flight?(YYYY-MM-DD) ").split("-")
@@ -50,6 +52,7 @@ class Client:
                 pass
             else:
                 break
+# Seeing if the month input is January(the month with the lowest average flight prices)
         if int(month) == 1:
             self.month_factor = .90
         else:
@@ -57,15 +60,17 @@ class Client:
         time_difference = flight_time - current_day
         print(time_difference)
         print(f"Departure-Date: {flight_time.strftime('%a, %b, %d, %Y')}")
+# Seeing if the flight time is 24 days or more away(Flights booked this far in advance are cheaper)
         if int(str(time_difference)[0:2]) > 24:
             self.time_factor = .95
         else:
             self.time_factor = 1
+# Seeing if the flight is booked for a Friday(the day with the lowest average flight prices)
         if flight_time.strftime("%a") == "Fri":
             self.day_factor = .90
         else:
             self.day_factor = 1
-
+# This function calculates distance based on the curvature of the Earth
     def distance_calculation(self):
         lat1, lon1 = (self.get_location.latitude, self.get_location.longitude)
         lat2, lon2 = (self.get_location2.latitude, self.get_location2.longitude)
@@ -77,6 +82,7 @@ class Client:
             math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
         distance_km = 2 * earth_radius * math.atan2(math.sqrt(a), math.sqrt(1 - a))
         distance_miles = 2 * earth_radius * math.atan2(math.sqrt(a), math.sqrt(1 - a)) * 0.621371
+# Distance price is calculated by dividing the distance in miles by the product of the miles per gallon and the average jet fuel price
         distance_price_factor = (distance_miles / mpg * fuel_price)
         total = (distance_price_factor / average_passengers) * self.time_factor * self.month_factor * self.day_factor
         print(f"{self.name}, your ticket price should be ~ ${total:,.2f} (one-way|economy)")
